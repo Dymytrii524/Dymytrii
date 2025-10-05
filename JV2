@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор випадкових рядків</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .checkbox-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-item:last-child {
+            margin-bottom: 0;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-generate:active {
+            transform: translateY(0);
+        }
+
+        .result-group {
+            margin-top: 25px;
+        }
+
+        #result {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            word-break: break-all;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Генератор випадкових рядків</h1>
+        
+        <div class="input-group">
+            <label for="length">Довжина рядка:</label>
+            <input type="number" id="length" min="1" max="1000" value="10">
+        </div>
+
+        <div class="input-group">
+            <label>Використовувати символи:</label>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="useDigits" checked>
+                    <label for="useDigits">Цифри (0-9)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="useUppercase" checked>
+                    <label for="useUppercase">Великі літери (A-Z)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="useLowercase" checked>
+                    <label for="useLowercase">Малі літери (a-z)</label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-generate" id="generateBtn">Generate</button>
+        <div class="error" id="error"></div>
+
+        <div class="result-group">
+            <label for="result">Згенерований рядок:</label>
+            <input type="text" id="result" readonly>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#generateBtn').on('click', function() {
+                const length = parseInt($('#length').val());
+                const useDigits = $('#useDigits').is(':checked');
+                const useUppercase = $('#useUppercase').is(':checked');
+                const useLowercase = $('#useLowercase').is(':checked');
+
+                $('#error').hide();
+
+                if (!length || length < 1) {
+                    $('#error').text('Будь ласка, вкажіть коректну довжину рядка').show();
+                    return;
+                }
+
+                if (!useDigits && !useUppercase && !useLowercase) {
+                    $('#error').text('Будь ласка, виберіть хоча б один тип символів').show();
+                    return;
+                }
+
+                let chars = '';
+                if (useDigits) chars += '0123456789';
+                if (useUppercase) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                if (useLowercase) chars += 'abcdefghijklmnopqrstuvwxyz';
+
+                let result = '';
+                for (let i = 0; i < length; i++) {
+                    const randomIndex = Math.floor(Math.random() * chars.length);
+                    result += chars[randomIndex];
+                }
+
+                $('#result').val(result);
+            });
+
+            $('#length, input[type="checkbox"]').on('keypress change', function(e) {
+                if (e.type === 'keypress' && e.which === 13) {
+                    $('#generateBtn').click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
