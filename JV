@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Інтерактивний макет</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-row {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .left-panel {
+            width: 250px;
+            background: #3498db;
+            position: relative;
+            transition: width 0.3s ease, margin-left 0.3s ease;
+            overflow: hidden;
+        }
+
+        .left-panel.collapsed {
+            width: 0;
+            margin-left: 0;
+        }
+
+        .left-content {
+            padding: 20px;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .toggle-arrow {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 60px;
+            background: #95a5a6;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            user-select: none;
+            transition: background 0.2s;
+            z-index: 10;
+        }
+
+        .toggle-arrow:hover {
+            background: #7f8c8d;
+        }
+
+        .right-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .top-panel {
+            background: #e74c3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            transition: height 0.1s;
+            overflow: hidden;
+        }
+
+        .divider {
+            height: 10px;
+            background: #95a5a6;
+            cursor: ns-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            user-select: none;
+            position: relative;
+        }
+
+        .divider:hover {
+            background: #7f8c8d;
+        }
+
+        .bottom-panel {
+            background: #2ecc71;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            transition: height 0.1s;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-row">
+            <div class="left-panel" id="leftPanel">
+                <div class="left-content">
+                    <h2>Лівий блок</h2>
+                    <p>Цей блок можна приховати</p>
+                </div>
+                <div class="toggle-arrow" id="toggleArrow">◀</div>
+            </div>
+            
+            <div class="right-container">
+                <div class="top-panel" id="topPanel">
+                    Верхній блок
+                </div>
+                
+                <div class="divider" id="divider">
+                    ☰
+                </div>
+                
+                <div class="bottom-panel" id="bottomPanel">
+                    Нижній блок
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            let isLeftCollapsed = false;
+
+            $('#toggleArrow').on('click', function() {
+                const $leftPanel = $('#leftPanel');
+                const $arrow = $(this);
+                
+                if (isLeftCollapsed) {
+                    $leftPanel.removeClass('collapsed');
+                    $arrow.html('◀');
+                } else {
+                    $leftPanel.addClass('collapsed');
+                    $arrow.html('▶');
+                }
+                
+                isLeftCollapsed = !isLeftCollapsed;
+            });
+
+            let isDragging = false;
+            let startY = 0;
+            let startTopHeight = 0;
+            let startBottomHeight = 0;
+            const minHeight = 100;
+
+            $('#divider').on('mousedown', function(e) {
+                isDragging = true;
+                startY = e.clientY;
+                
+                const containerHeight = $('.right-container').height();
+                const dividerHeight = $(this).height();
+                const topHeight = $('#topPanel').height();
+                const bottomHeight = $('#bottomPanel').height();
+                
+                startTopHeight = topHeight;
+                startBottomHeight = bottomHeight;
+                
+                $('body').css('user-select', 'none');
+                e.preventDefault();
+            });
+
+            $(document).on('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const deltaY = e.clientY - startY;
+                const newTopHeight = startTopHeight + deltaY;
+                const newBottomHeight = startBottomHeight - deltaY;
+                
+                if (newTopHeight >= minHeight && newBottomHeight >= minHeight) {
+                    $('#topPanel').height(newTopHeight);
+                    $('#bottomPanel').height(newBottomHeight);
+                }
+            });
+
+            $(document).on('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    $('body').css('user-select', '');
+                }
+            });
+
+            function initializeHeights() {
+                const containerHeight = $('.right-container').height();
+                const dividerHeight = $('#divider').height();
+                const availableHeight = containerHeight - dividerHeight;
+                const halfHeight = availableHeight / 2;
+                
+                $('#topPanel').height(halfHeight);
+                $('#bottomPanel').height(halfHeight);
+            }
+
+            initializeHeights();
+            $(window).on('resize', initializeHeights);
+        });
+    </script>
+</body>
+</html>
